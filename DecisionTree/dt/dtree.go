@@ -1,3 +1,7 @@
 package dt
 
-func loadData()
+func LoadDesc(filename string, dataNames map[string]interface{}) ([]string, map[string][]string, []string) {
+	
+}
+	
+
