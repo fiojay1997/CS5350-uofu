@@ -164,32 +164,100 @@ def predict_cars_test(depth, function):
     return 1 - (success / len(dataset))
 
 
-def predict_banks():
+def predict_banks(depth, function):
     dataset = load_data('../bank/train.csv')
     labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
               'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome', 'label']
-    tree = create_tree(dataset, labels, 'entropy', 1)
-    error_rate = predict(dataset, labels, tree)
-    print(error_rate)
+    tree = create_tree(dataset, labels, 'entropy', depth)
+    predict_labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
+                      'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome']
+    success = 0
+    for data in dataset:
+        if predict(data, predict_labels, tree):
+            success += 1
+    return 1 - (success / len(dataset))
+
+
+def predict_banks_test(depth, function):
+    dataset = load_data('../bank/test.csv')
+    labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
+              'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome', 'label']
+    tree = create_tree(dataset, labels, 'entropy', depth)
+    predict_labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
+                      'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome']
+    success = 0
+    for data in dataset:
+        if predict(data, predict_labels, tree):
+            success += 1
+    return 1 - (success / len(dataset))
+
+
+def predict_banks_with_missing(depth, function):
+    dataset = load_data('../bank/test.csv')
+    labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
+              'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome', 'label']
+    tree = create_tree(dataset, labels, 'entropy', depth)
+    predict_labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
+                      'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome']
+
+    value_counts = {}
+    for i in range(len(labels)):
+        for data in dataset:
+            if data[i] != 'unknown':
+                if data[i] not in value_counts and data[i]:
+                    value_counts[data[i]] = 1
+                else:
+                    value_counts[data[i]] += 1
+        most_common_value = max(
+            value_counts.items(), key=operator.itemgetter(1))[0]
+        for data in dataset:
+            if data[i] == 'unknown':
+                data[i] = most_common_value
+
+    success = 0
+    for data in dataset:
+        if predict(data, predict_labels, tree):
+            success += 1
+    return 1 - (success / len(dataset))
 
 
 if __name__ == '__main__':
-    for i in range(6):
+    for i in range(7):
         print('Using Gini index on cars train dataset :',
               predict_cars_err(i, 'gini'))
-    for i in range(6):
+    for i in range(7):
         print('Using Entropy on cars train dataset:',
               predict_cars_err(i, 'entropy'))
-    for i in range(6):
+    for i in range(7):
         print('Using Majority Error on cars train dataset:',
               predict_cars_err(i, 'me'))
 
-    for i in range(6):
+    for i in range(7):
         print('Using Gini index on cars test dataset:',
               predict_cars_test(i, 'gini'))
-    for i in range(6):
+    for i in range(7):
         print('Using Entropy on cars test dataset:',
               predict_cars_test(i, 'entropy'))
-    for i in range(6):
+    for i in range(7):
         print('Using Majority Error on cars test dataset:',
               predict_cars_test(i, 'me'))
+
+    # for i in range(17):
+    #     print('Using Gini index on bank train dataset :',
+    #           predict_banks(i, 'gini'))
+    # for i in range(17):
+    #     print('Using Entropy on cars bank dataset:',
+    #           predict_banks(i, 'entropy'))
+    # for i in range(17):
+    #     print('Using Majority Error on bank train dataset:',
+    #           predict_banks(i, 'me'))
+
+    # for i in range(17):
+    #     print('Using Gini index on bank test dataset:',
+    #           predict_banks_test(i, 'gini'))
+    # for i in range(17):
+    #     print('Using Entropy on bank test dataset:',
+    #           predict_banks_test(i, 'entropy'))
+    # for i in range(17):
+    #     print('Using Majority Error on bank test dataset:',
+    #           predict_banks_test(i, 'me'))
