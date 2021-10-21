@@ -1,4 +1,3 @@
-from math import log
 from numpy import log2, square
 import operator
 
