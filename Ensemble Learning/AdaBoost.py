@@ -1,22 +1,49 @@
+from DecisionTree import DecisionTreeClassifierWithWeight
 import numpy as np
 
-def adaboost(dataset, data_labels, round):
-    classifier = create_tree(dataset, data_labels, 'gini', 1)
-    length = len(dataset)
-    weight = 1 / length
-    predictions = [np.zeros(length)]
+class AdaBoostClassifier:
+    def __init__(self, n_estimators=50):
+        self.n_estimators = n_estimators
+        self.estimators = []
+        self.alphas = []
 
-    for _ in range(round):
-        predict = dt.predict(dataset, data_labels, classifier)
-        miss = [int(x) for x in (predict != data_labels)]
-        err = np.dot(weight, miss)
-        alpha = 0.5 * np.log((1 - err) / float(err))
-        filter_miss = [x if x == 1 else - 1 for x in miss]
-        weight = np.multiply(weight, np.exp([float(x) * alpha for x in filter_miss]))
-        weight = sum(weight)
-        prediction = [i if x == 1 else -1 for x in predict]
-        predictions = predictions + np.multiply(alpha, prediction)
+    def fit(self, X, y):
+        sample_weight = np.ones(len(X)) / len(X)  # 初始化样本权重为 1/N
+        for _ in range(self.n_estimators):
+            dtc = DecisionTreeClassifierWithWeight().fit(X, y, sample_weight)  # 训练弱学习器
+            alpha = 1/2 * np.log((1-dtc.best_err)/dtc.best_err)  # 权重系数
+            y_pred = dtc.predict(X)
+            sample_weight *= np.exp(-alpha*y_pred*y)  # 更新迭代样本权重
+            sample_weight /= np.sum(sample_weight)  # 样本权重归一化
+            self.estimators.append(dtc)
+            self.alphas.append(alpha)
+        return self
+
+    def predict(self, X):
+        y_pred = np.empty((len(X), self.n_estimators))  # 预测结果二维数组，其中每一列代表一个弱学习器的预测结果
+        for i in range(self.n_estimators):
+            y_pred[:, i] = self.estimators[i].predict(X)
+        y_pred = y_pred * np.array(self.alphas)  # 将预测结果与训练权重乘积作为集成预测结果
+        return 2*(np.sum(y_pred, axis=1)>0)-1  # 以0为阈值，判断并映射为-1和1
+
+    def score(self, X, y):
+        y_pred = self.predict(X)
+        return np.mean(y_pred==y)
+
+    def load_data(filename):
+        data = []
+        with open(filename) as f:
+            for line in f:
+                data.append(line.strip().split(','))
+        return data
+        
+if __name__ == 'name':
+    labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
+              'loan', 'contact', 'day', 'month', 'duration', 'campaign', 'pdays', 'previous', 'poutcome', 'label']
+    train_data = AdaBoostClassifier.load_data('../bank/train.csv')
+    test_data = AdaBoostClassifier.load_data('../bank/test.csv')
+    print(AdaBoostClassifier.fit(train_data, labels).score(test_data, labels))
+
     
-    predictions = (predictions > 0) * 1
 
 
