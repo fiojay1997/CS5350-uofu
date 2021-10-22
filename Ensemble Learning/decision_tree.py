@@ -1,5 +1,6 @@
 import numpy as np
 import operator
+from random import randrange
 
 
 class Node:
@@ -135,15 +136,15 @@ def predict(dataset, features, decision_tree):
     return cur_tree.name == label
 
 
-def adaboost(dataset, data_labels, round):
-    classifier = create_tree(dataset, data_labels, 'gini', 1)
+def adaboost(dataset, features, round):
+    classifier = create_tree(dataset, features, 'gini', 1)
     length = len(dataset)
     weight = 1 / length
     predictions = [np.zeros(length)]
 
     for _ in range(round):
-        predict = predict(dataset, data_labels, classifier)
-        miss = [int(x) for x in (predict != data_labels)]
+        predict = predict(dataset, features, classifier)
+        miss = [int(x) for x in (predict != features)]
         err = np.dot(weight, miss)
         alpha = 0.5 * np.log((1 - err) / float(err))
         filter_miss = [x if x == 1 else - 1 for x in miss]
@@ -153,11 +154,15 @@ def adaboost(dataset, data_labels, round):
         predictions = predictions + np.multiply(alpha, prediction)
     
     predictions = (predictions > 0) * 1
+    return predictions
 
 
-def bagged(dataset, data_bales, round):
-    pass
+def bagged(dataset, features, round):
+    classifier = create_tree(dataset, features, 'gini', 1)
+    for _ in range(round):
+        for i in range(len(dataset)):
+            
 
 
-def randomforest(dataset, data_labels, round):
+def randomforest(dataset, features, round):
     pass
