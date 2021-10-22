@@ -1,7 +1,7 @@
 import numpy as np
 import operator
-from random import randrange
-
+from random import randint
+import math
 
 class Node:
     def __init__(self, name):
@@ -159,10 +159,33 @@ def adaboost(dataset, features, round):
 
 def bagged(dataset, features, round):
     classifier = create_tree(dataset, features, 'gini', 1)
+    predictions = []
+    votes = []
     for _ in range(round):
-        for i in range(len(dataset)):
-            
+        samples = []
+        for _ in range(len(dataset)):
+            samples.append(dataset[randint(0, len(dataset) - 1)].copy())
+        predict = predict(dataset, features, classifier) 
+        predictions.append(predict)
 
+        err = 0
+        for i in range(dataset):
+            if predictions[i] == True:
+                err += 1
+        vote = (1 / 2) * math.log((1 - err) / err)
+        votes.append(vote)
+    
+    sum = 0
+    for i in range(round):
+        if predictions[i] == True:
+            sum += votes[i]
+        else:
+            sum += -(votes[i])
+    
+    if np.sign(sum) == 1:
+        return True
+    else:
+        return False
 
 def randomforest(dataset, features, round):
     pass
