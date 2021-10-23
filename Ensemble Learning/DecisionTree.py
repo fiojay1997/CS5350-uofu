@@ -1,6 +1,4 @@
 import numpy as np
-from sklearn.datasets import load_breast_cancer
-from sklearn.model_selection import train_test_split
 
 class DecisionTreeClassifierWithWeight:
     def __init__(self):
@@ -38,9 +36,3 @@ class DecisionTreeClassifierWithWeight:
             return np.sum((y_pre == y)*sample_weight)
         return np.mean(y_pre == y)
 
-
-if __name__ == '__main__':
-    X, y = load_breast_cancer(return_X_y=True)
-    y = 2*y-1 
-    X_train, X_test, y_train, y_test = train_test_split(X, y)
-    print(type(X_train))
