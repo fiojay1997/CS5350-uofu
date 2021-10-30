@@ -177,6 +177,22 @@ def predict_banks(depth, function):
     return 1 - (success / len(dataset))
 
 
+def predict():
+    dataset = load_data('train_final.csv')
+    labels = [
+        'age', 'workclass', 'fnlwgt', 'education', 'marital', 
+        'occupation', 'relationship', 'race', 'sex', 'hours', 
+        'country', 'income>50K'
+    ]
+    tree = create_tree(dataset, labels, 'gini', 1000)
+    predict_labels = [
+        'age', 'workclass', 'fnlwgt', 'education', 'marital', 
+        'occupation', 'relationship', 'race', 'sex', 'hours', 
+        'country'
+    ]
+    res = []
+
+
 def predict_banks_test(depth, function):
     dataset = load_data('../bank/test.csv')
     labels = ['age', 'job', 'material', 'education', 'default', 'balance', 'housing'
