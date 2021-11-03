@@ -67,7 +67,7 @@ def get_perceptron_err(x, y, weights):
     for i in range(len(pred)):
         if pred[i] != y[i]:
             err += 1
-    print('The perceptron has err rate of {}'.format(err / len(y)))
+    print('The perceptron has err rate of {}'.format(1 - err / len(y)))
 
 
 def load_data(filename):
@@ -87,9 +87,14 @@ if __name__ == '__main__':
     get_perceptron_err(testx, testy, voted_weights)
     get_perceptron_err(testx, testy, average_weights)
 
-    print('--- following is the weight vectors of standard perceptrob')
-    print(weights_list)
-    print('--- following is the weight vectors of voted perceptrob')
-    print(voted_weights_list)
-    print('--- following is the weight vectors of average perceptrob')
-    print(average_weights_list)
+    with open('StandardPerceptronWeightVectors.txt', 'w') as f:
+        for weights in weights_list:
+            f.write('{}\n'.format(weights))
+
+    with open('VotedPerceptronWeightVectors.txt', 'w') as f:
+        for vweights in voted_weights_list:
+            f.write('{}\n'.format(vweights))
+
+    with open('AveragePerceptronWeightVectors.txt', 'w') as f:
+        for aweights in average_weights_list:
+            f.write('{}\n'.format(aweights))
