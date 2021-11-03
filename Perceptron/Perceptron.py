@@ -58,7 +58,7 @@ def average_perceptron(data, y, rate=0.01, T=10):
                     weights = new_weights
                     weights_list.append(new_weights) 
                 average += weights
-    return weights_list, average
+    return weights_list, weights
 
 
 def get_perceptron_err(x, y, weights):
@@ -67,11 +67,9 @@ def get_perceptron_err(x, y, weights):
     for i in range(len(pred)):
         if pred[i] != y[i]:
             err += 1
-    print('The standard perceptron has err rate of {}'.format(err / len(y)))
+    print('The perceptron has err rate of {}'.format(err / len(y)))
 
 
-def get_voted_perceptron_err(x, y, weights):
-    pass
 def load_data(filename):
     df = pd.read_csv(filename)
     x = df.iloc[:, :-1].to_numpy().tolist()
@@ -82,5 +80,16 @@ def load_data(filename):
 if __name__ == '__main__':
     x, y = load_data('bank-note/train.csv')
     testx, testy = load_data('bank-note/test.csv')
-    weights_list, weights = voted_perceptron(x, y)
+    weights_list, weights = perceptron(x, y)
+    voted_weights_list, voted_weights = voted_perceptron(x, y)
+    average_weights_list, average_weights = average_perceptron(x, y)
     get_perceptron_err(testx, testy, weights)
+    get_perceptron_err(testx, testy, voted_weights)
+    get_perceptron_err(testx, testy, average_weights)
+
+    print('--- following is the weight vectors of standard perceptrob')
+    print(weights_list)
+    print('--- following is the weight vectors of voted perceptrob')
+    print(voted_weights_list)
+    print('--- following is the weight vectors of average perceptrob')
+    print(average_weights_list)
