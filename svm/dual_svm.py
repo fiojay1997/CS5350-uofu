@@ -1,55 +1,41 @@
-import pandas as pd
 import numpy as np
-from scipy import optimize
-from copy import deepcopy
+import pandas as pd
+import scipy.optimize
 
 
-def build_svm(dataset, C, y, kernel):
-    dataset_copy = deepcopy(dataset)
-    x = dataset_copy[:, :-1]
-    y = dataset_copy[:, -1]
+def build_dual_svm(dataset, alpha, C, kernel):
+    def cons(alpha, y):
+        return np.dot(alpha, y).sum()
 
-    cons = [{
-        'type': 'eq',
-        'fun': cons_ay,
-        'agrs': y
-    }]
+    def opt_func(alpha, x, y):
+        newAlpha = np.outer(alpha, alpha)
+        newY = np.outer(y, y)
+        if kernel == 'linear':
+            newX = linear_func(x)
+        else:
+            newX = gaussian(x)
+        return (newX * newY * newAlpha).sum() * 0.5 - alpha.sum()
 
-    bounds = [(0, C)] * len(x)
+    x = np.array([row[:-1] for row in dataset])
+    y = np.array([row[-1] for row in dataset])
 
-    opt = optimize.minimize(
-        minimize,
-        x0=np.zeros(len(x)),
-        args=(x, y, kernel, y),
-        method="SLSQP",
-        constraints=cons,
-        bounds=bounds)
+    bound = scipy.optimize.Bounds(0, C)
+    res = scipy.optimize.minimize(fun=opt_func, x0=np.zeros(len(dataset)), args=(
+        x, y), method='SLSQP', bounds=bound, constraints={'type': 'eq', 'fun': cons, 'args': [y]})
 
-    res = opt.x
-
-
-def gaussian(x, y):
-    return np.exp(-np.sqrt(np.linalg.norm(x - y)) ** 2)
-
-
-def cons_ay(a, y):
-    return np.dot(a, y)
+    a = res.x
+    print(a)
+    w = np.dot(np.dot(a, y), kernel(x, x.transpose*()))
+    b = y - np.dot(w.transpose(), x)
+    return w, b
 
 
-def linear(dataset):
-    return np.dot(dataset, np.transpose(dataset))
+def linear_func(x):
+    return x.dot(np.transpose(x))
 
 
-def minimize(a, x, y, kernel, gamma):
-    aout = np.outer(a, a)
-    yout = np.outer(y, y)
-
-    if kernel == 'gaussian':
-        xk = gaussian(x, gamma)
-    else:
-        xk = linear(x)
-
-    return 0.5 * (aout * yout * xk).sum() - a.sum()
+def gaussian(x):
+    return 0
 
 
 def load_data(file):
@@ -59,3 +45,10 @@ def load_data(file):
         if data[-1] == 0:
             data[-1] = -1
     return df
+
+
+if __name__ == '__main__':
+    df = load_data('bank-note/train.csv')
+    test_df = load_data('bank-note/test.csv')
+
+    print(build_dual_svm(df, 0.1, 100/873, 'linear'))
