@@ -34,8 +34,8 @@ def linear_func(x):
     return x.dot(np.transpose(x))
 
 
-def gaussian(x):
-    return 0
+def gaussian(x, g):
+    return np.exp(-1 * x / g)
 
 
 def load_data(file):
@@ -45,6 +45,14 @@ def load_data(file):
         if data[-1] == 0:
             data[-1] = -1
     return df
+
+
+def predict(test_x, test_y, w, g):
+    predict = 0
+    for i in range(test_x):
+        predict += w[i] * test_y[i](-1 * np.linalg(test_x[i]) ** 2 / g)
+
+    return np.sign(predict)
 
 
 if __name__ == '__main__':
